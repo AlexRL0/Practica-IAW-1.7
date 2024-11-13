@@ -40,3 +40,5 @@ wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRE
 # Cambiamos el propietario y el grupo al directorio /var/www/html/
 chown -R www-data:www-data /var/www/html/
 
+# Configuramos los enlaces permanentes
+wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
