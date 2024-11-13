@@ -19,13 +19,10 @@ chmod +x /tmp/wp-cli.phar
 sudo mv /tmp/wp-cli.phar /usr/local/bin/wp
 
 # Eliminamos instalaciones previas en /var/www/html
-rm -rf /var/www/html/*
+rm -rf ${WORDPRESS_DIRECTORY}/*
 
 # Descargamos el código fuente de WordPress
-wp core download --locale=es_ES --path=/var/www/html --allow-root
-
-# Cambiamos el propietario y el grupo al directorio /var/www/html/
-chown -R www-data:www-data /var/www/html/
+wp core download --locale=es_ES --path=$WORDPRESS_DIRECTORY --allow-root
 
 # Creamos la base de datos y el usuario para WordPress
 mysql -u root <<< "DROP DATABASE IF EXISTS $WORDPRESS_DB_NAME"
@@ -33,3 +30,10 @@ mysql -u root <<< "CREATE DATABASE $WORDPRESS_DB_NAME"
 mysql -u root <<< "DROP USER IF EXISTS $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL"
 mysql -u root <<< "CREATE USER $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL IDENTIFIED BY '$WORDPRESS_DB_PASSWORD'"
 mysql -u root <<< "GRANT ALL PRIVILEGES ON $WORDPRESS_DB_NAME.* TO $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL"
+
+# Creamos el archivo de configuración de WordPress
+wp config create --dbname=$WORDPRESS_DB_NAME --dbuser=$WORDPRESS_DB_USER --dbpass=$WORDPRESS_DB_PASSWORD --dbhost=$WORDPRESS_DB_HOST --path=$WORDPRESS_DIRECTORY --allow-root
+
+# Instalamos WordPress
+wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRESS_USUARIO_ADMIN --admin_password=$WORDPRESS_CONTRA_ADMIN --admin_email=$WORDPRESS_EMAIL_ADMIN --path=$WORDPRESS_DIRECTORY --allow-root
+
