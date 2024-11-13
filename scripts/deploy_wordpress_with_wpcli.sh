@@ -37,3 +37,6 @@ wp config create --dbname=$WORDPRESS_DB_NAME --dbuser=$WORDPRESS_DB_USER --dbpas
 # Instalamos WordPress
 wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRESS_USUARIO_ADMIN --admin_password=$WORDPRESS_CONTRA_ADMIN --admin_email=$WORDPRESS_EMAIL_ADMIN --path=$WORDPRESS_DIRECTORY --allow-root
 
+# Cambiamos el propietario y el grupo al directorio /var/www/html/
+chown -R www-data:www-data /var/www/html/
+
