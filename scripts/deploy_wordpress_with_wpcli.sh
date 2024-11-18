@@ -37,9 +37,6 @@ wp config create --dbname=$WORDPRESS_DB_NAME --dbuser=$WORDPRESS_DB_USER --dbpas
 # Instalamos WordPress
 wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRESS_USUARIO_ADMIN --admin_password=$WORDPRESS_CONTRA_ADMIN --admin_email=$WORDPRESS_EMAIL_ADMIN --path=$WORDPRESS_DIRECTORY --allow-root
 
-# Configuramos los enlaces permanentes
-wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
-
 # Instalamos y activamos el theme mindscape
 wp theme install mindscape --activate --path=$WORDPRESS_DIRECTORY --allow-root
 
@@ -49,6 +46,8 @@ wp plugin install wps-hide-login --activate --path=$WORDPRESS_DIRECTORY --allow-
 # Configuramos el plugin de WHL
 wp option update whl_page "$WORDPRESS_HIDE_LOGIN_URL" --path=$WORDPRESS_DIRECTORY --allow-root
 
+# Configuramos los enlaces permanentes
+wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
 
 # Cambiamos el propietario y el grupo al directorio /var/www/html/
 chown -R www-data:www-data /var/www/html/
