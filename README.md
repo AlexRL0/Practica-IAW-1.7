@@ -24,7 +24,7 @@ Una vez dado al recuadro de crear el nombre, nos sale un asistente para poner el
 
 Hecho esto ya podemos automatizar el proceso de la administración de Wordpress con la utilidad WP-CLI
 
-## 2. Creación del archivo `deploy_wordpress_root_directory` para la instalación en la raíz
+## 2. Creación del archivo `deploy_wordpress_with_wpcli` para la instalación en la raíz
 
 ### Paso 1. Importamos el archivo de variables y mostramos los comandos que se van ejecutando 
 
