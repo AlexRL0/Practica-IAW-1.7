@@ -51,40 +51,31 @@ rm -rf /tmp/wp-cli.phar
 wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -P /tmp
 ```
 
-### Paso 4. Descomprimimos el codigo fuente de WordPress
+### Paso 4. Le asignamos permisos de ejecución
 
 ```bash
-tar -xzvf /tmp/latest.tar.gz -C /tmp
+chmod +x /tmp/wp-cli.phar
 ```
 
-> [!NOTE]  
-> Utilizamos los siguientes parámetros:
-> 
-> * `-x`: Indica que deseamos extraer el contenido del archivo.
->
-> * `-z`: Señala que queremos descomprimir el archivo.
->
-> * `-v`: Activa el modo detallado para mostrar en pantalla el proceso de descompresión.
->
-> * `-f`: Se usa para especificar el nombre del archivo de entrada.
->
-> * `-C`: Se utiliza para definir el directorio de destino.
-
-
-
-### Paso 5. Eliminamos el contenido de instalaciones previas en /var/www/html
+### Paso 5. Movemos el script WP-CLI al directorio /usr/local/bin
 
 ```bash
-rm -rf /var/www/html/*
+mv /tmp/wp-cli.phar /usr/local/bin/wp
 ```
 
-### Paso 6. Movemos el código fuente de WordPress a /var/www/html
+### Paso 6. Eliminamos instalaciones previas en /var/www/html
 
 ```bash
-mv -f /tmp/wordpress/* /var/www/html
+rm -rf ${WORDPRESS_DIRECTORY}/*
 ```
 
-### Paso 7. Creamos la base de datos y el usuario para WordPress
+### Paso 7. Descargamos el código fuente de WordPress
+
+```bash
+wp core download --locale=es_ES --path=$WORDPRESS_DIRECTORY --allow-root
+```
+
+### Paso 8. Creamos la base de datos y el usuario para WordPress
 
 ```bash
 mysql -u root <<< "DROP DATABASE IF EXISTS $WORDPRESS_DB_NAME"
@@ -97,179 +88,70 @@ mysql -u root <<< "GRANT ALL PRIVILEGES ON $WORDPRESS_DB_NAME.* TO $WORDPRESS_DB
 > [!IMPORTANT]  
 > Las variables las cambiamos por las que tenemos en el archivo `.env` configuradas para que se cree todo correctamente.
 
-### Paso 8. Creamos el archivo de configuracion de WordPress
+### Paso 9. Creamos el archivo de configuración de WordPress
 
 ```bash
-cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+wp config create --dbname=$WORDPRESS_DB_NAME --dbuser=$WORDPRESS_DB_USER --dbpass=$WORDPRESS_DB_PASSWORD --dbhost=$WORDPRESS_DB_HOST --path=$WORDPRESS_DIRECTORY --allow-root
 ```
 
-### Paso 9. Configuramos el archivo de configuracion de WordPress
+### Paso 10. Instalamos WordPress
 
 ```bash
-sed -i "s/database_name_here/$WORDPRESS_DB_NAME/" /var/www/html/wp-config.php
-sed -i "s/username_here/$WORDPRESS_DB_USER/" /var/www/html/wp-config.php
-sed -i "s/password_here/$WORDPRESS_DB_PASSWORD/" /var/www/html/wp-config.php
-sed -i "s/localhost/$WORDPRESS_DB_HOST/" /var/www/html/wp-config.php
+wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRESS_USUARIO_ADMIN --admin_password=$WORDPRESS_CONTRA_ADMIN --admin_email=$WORDPRESS_EMAIL_ADMIN --path=$WORDPRESS_DIRECTORY --allow-root
 ```
 
-> [!IMPORTANT]  
-> Este archivo lo modificamos ya que el original tiene unas variables que no tenemos y que si dejamos el archivo tal cual como viene pues no funcionaría. Así que, con el comando `sed -i` lo cambiamos con nuestras variables que tenemos en el archivo `.env`.
+> [!IMPORTANT]
+> A continuación, se especifican los siguientes parámetros:
+> 
+> - **`--url`**: Es el dominio del sitio WordPress. En el ejemplo anterior, usamos el dominio `practica-wordpress.ddns.net`, que es el nombre configurado en el servidor DNS. En una instalación en una máquina local, también podríamos usar `localhost` o la dirección IP del servidor.
+> - **`--title`**: Es el título del sitio WordPress.
+> - **`--admin_user`**: Es el nombre del usuario administrador.
+> - **`--admin_password`**: Es la contraseña del usuario administrador.
+> - **`--admin_email`**: Es el correo electrónico del usuario administrador.
+>
+> Las variables las cambiamos por las que tenemos en el archivo `.env` configuradas para que se cree todo correctamente.
 
-### Paso 10. Cambiamos el propietario y el grupo al directorio /var/www/html/
+
+### Paso 11. Instalamos un plugin
 
 ```bash
-chown -R www-data:www-data /var/www/html/
+wp plugin install wps-hide-login --activate --path=$WORDPRESS_DIRECTORY --allow-root
 ```
 
-### Paso 11. Comprobación de que funciona WordPress
-
-![](imagenes/WordPress-1.6.png)
-
-![](imagenes/WordPress2-1.6.png)
-
-![](imagenes/WordPress3-1.6.png)
-
-----
-## 3. Creación del archivo `deploy_wordpress_own_directory` para la instalación en la raíz
-
-### Paso 1. Importamos el archivo de variables y mostramos los comandos que se van ejecutando 
+### Paso 12. Configuramos el plugin de WHL
 
 ```bash
-source .env
+wp option update whl_page "$WORDPRESS_HIDE_LOGIN_URL" --path=$WORDPRESS_DIRECTORY --allow-root
 ```
+
+> [!IMPORTANT]
+> Esto lo hacemos para configurar el nombre de la URL que vamos a utilizar para acceder al panel de administración de wordpress.
+>  
+> La variable la cambiamos por la que tenemos en el archivo `.env` configurada para que se active correctamente.
+
+### Paso 13. Configuramos los enlaces permanentes
 
 ```bash
-set -ex
+wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
 ```
 
-### Paso 2. Eliminamos descargas previas del codigo fuente de WordPress
+> [!IMPORTANT]
+> El parámetro `/ %postname%/` indica el patrón de reescritura que se quiere usar. Existen otros patrones de reescritura disponibles:
+> 
+> - `/%year%/%monthnum%/%day%/%postname%/`: Año, mes, día y nombre de la entrada.
+> - `/%year%/%monthnum%/%postname%/`: Año, mes y nombre de la entrada.
+> - `/%year%/%postname%/`: Año y nombre de la entrada.
+> - `/%postname%/`: Nombre de la entrada.
+> 
+> Es importante mencionar que para que los enlaces permanentes funcionen correctamente, el módulo `mod_rewrite` de Apache debe estar activado y la directiva `AllowOverride All` debe estar configurada en el sitio virtual de Apache.
 
-```bash
-rm -rf /tmp/latest.tar.gz
-```
-
-### Paso 3. Descargamos el codigo fuente de WordPress
-
-```bash
-wget https://wordpress.org/latest.tar.gz -P /tmp
-```
-
-### Paso 4. Descomprimimos el codigo fuente de WordPress
-
-```bash
-tar -xzvf /tmp/latest.tar.gz -C /tmp
-```
-
-### Paso 5. Eliminamos el contenido de instalaciones previas en /var/www/html
-
-```bash
-rm -rf /var/www/html/*
-```
-
-### Paso 6. Creamos el directorio para la instalación de WordPress
-
-```bash
-mkdir -p /var/www/html/$WORDPRESS_DIRECTORY
-```
-
-> [!IMPORTANT]  
-> Las variables que irán apareciendo durante los pasos están todas definidas en el archivo `.env` y en `.env.example` se pueden ver las variables que hay que tener definidas.
-
-### Paso 7. Movemos el código fuente de WordPress a /var/www/html
-
-```bash
-mv -f /tmp/wordpress/* /var/www/html/$WORDPRESS_DIRECTORY
-```
-
-### Paso 8. # Creamos la base de datos y el usuario para WordPress
-
-```bash
-mysql -u root <<< "DROP DATABASE IF EXISTS $WORDPRESS_DB_NAME"
-mysql -u root <<< "CREATE DATABASE $WORDPRESS_DB_NAME"
-mysql -u root <<< "DROP USER IF EXISTS $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL"
-mysql -u root <<< "CREATE USER $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL IDENTIFIED BY '$WORDPRESS_DB_PASSWORD'"
-mysql -u root <<< "GRANT ALL PRIVILEGES ON $WORDPRESS_DB_NAME.* TO $WORDPRESS_DB_USER@$IP_CLIENTE_MYSQL"
-```
-
-### Paso 9. Creamos el archivo de configuracion de WordPress
-
-```bash
-cp /var/www/html/$WORDPRESS_DIRECTORY/wp-config-sample.php /var/www/html/$WORDPRESS_DIRECTORY/wp-config.php
-```
-
-### Paso 10. Configuramos el archivo de configuracion de WordPress
-
-```bash
-sed -i "s/database_name_here/$WORDPRESS_DB_NAME/" /var/www/html $WORDPRESS_DIRECTORY/wp-config.php
-sed -i "s/username_here/$WORDPRESS_DB_USER/" /var/www/html/$WORDPRESS_DIRECTORY/wp-config.php
-sed -i "s/password_here/$WORDPRESS_DB_PASSWORD/" /var/www/html/$WORDPRESS_DIRECTORY/wp-config.php
-sed -i "s/localhost/$WORDPRESS_DB_HOST/" /var/www/html/$WORDPRESS_DIRECTORY/wp-config.php
-sed -i "/DB_COLLATE/a define('WP_SITEURL', 'https://$LE_DOMAIN/$WORDPRESS_DIRECTORY');" /var/www/html/wordpress/wp-config.php
-sed -i "/WP_SITEURL/a define('WP_HOME', 'https://$LE_DOMAIN');" /var/www/html/wordpress/wp-config.php
-```
-
-### Paso 11. Cambiamos el propietario y el grupo al directorio /var/www/html/
+### Paso 14. Cambiamos el propietario y el grupo al directorio /var/www/html/
 
 ```bash
 chown -R www-data:www-data /var/www/html/
 ```
 
-### Paso 12. Copiamos el archivo index.php
-
-```bash
-cp /var/www/html/$WORDPRESS_DIRECTORY/index.php /var/www/html
-```
-
-### Paso 13. Configuramos el archivo index.php
-
-```bash
-sed -i "s#wp-blog-header.php#$WORDPRESS_DIRECTORY/wp-blog-header.php#" /var/www/html/index.php
-```
-
-### Paso 14. Borramos los valores por defecto de las security keys que aparecen en el archivo de configuración
-
-```bash
-sed -i "/AUTH_KEY/d" /var/www/html/wordpress/wp-config.php
-sed -i "/SECURE_AUTH_KEY/d" /var/www/html/wordpress/wp-config.php
-sed -i "/LOGGED_IN_KEY/d" /var/www/html/wordpress/wp-config.php
-sed -i "/NONCE_KEY/d" /var/www/html/wordpress/wp-config.php
-sed -i "/AUTH_SALT/d" /var/www/html/wordpress/wp-config.php
-sed -i "/SECURE_AUTH_SALT/d" /var/www/html/wordpress/wp-config.php
-sed -i "/LOGGED_IN_SALT/d" /var/www/html/wordpress/wp-config.php
-sed -i "/NONCE_SALT/d" /var/www/html/wordpress/wp-config.php
-```
-
-> [!IMPORTANT]  
-> Eliminamos los valores por defecto de las security keys que aparecen en el archivo de configuración para generar unas nuevas con la API de WordPress.
-
-### Paso 15. Hacemos una llamada a la API de wordpress para obtener las security keys y almacenamos el resultado en una variable de entorno
-
-```bash
-SECURITY_KEYS=$(curl https://api.wordpress.org/secret-key/1.1/salt/)
-```
-
-### Paso 16. Modificamos las nuevas security keys
-
-```bash
-SECURITY_KEYS=$(echo $SECURITY_KEYS | tr / _)
-```
-
-> [!IMPORTANT]  
-> Las nuevas security keys que acabamos de generar pueden contener el carácter / y este carácter puede darnos problemas a la hora de utilizar el comando sed para añadirlas al archivo de configuración. Para evitar posibles problemas con el carácter / vamos a reemplazarlo por el carácter _..
-
-### Paso 17. Añadimos las security keys al archivo de configuración
-
-```bash
-sed -i "/@-/a $SECURITY_KEYS" /var/www/html/wordpress/wp-config.php
-```
-
-### Paso 18. Cambiamos el propietario y el grupo al directorio /var/www/html
-
-```bash
-chown -R www-data:www-data /var/www/html/
-```
-
-### Paso 19. Comprobación de que WordPress funciona
+### Paso 15. Comprobación de que WordPress funciona
 
 ![](imagenes/wordpress4-1.6.png)
 
