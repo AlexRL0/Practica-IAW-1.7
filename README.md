@@ -151,10 +151,10 @@ wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
 chown -R www-data:www-data /var/www/html/
 ```
 
-### Paso 15. Comprobación de que WordPress funciona
+### Paso 15. Comprobación de que WordPress y los plugins funcionan
 
-![](imagenes/wordpress4-1.6.png)
+![](imagenes/WordPress2-1.7.png)
 
-![](imagenes/wordpress5-1.6.png)
+![](imagenes/WordPress-1.7.png)
 
-![](imagenes/wordpress6-1.6.png)
+![](imagenes/WordPress3-1.7.png)
