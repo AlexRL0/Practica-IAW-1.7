@@ -4,7 +4,7 @@
 
 **para la instalación vamos a tener que crear la siguiente estructura de directorios y archivos:**
 
-![](imagenes/directorio-1.6.png)
+![](imagenes/directorio-1.7.png)
 
 **Una vez creados los archivos y directorios, procedemos a la instalación de las herramientas.**
 
@@ -36,20 +36,20 @@ source .env
 set -ex
 ```
 
-### Paso 2. Eliminamos descargas previas del codigo fuente de WordPress
+### Paso 2. Eliminamos descargas previas de WP-CLI
 
 ```bash
-rm -rf /tmp/latest.tar.gz
-```
-
-### Paso 3. Descargamos el codigo fuente de WordPress
-
-```bash
-wget https://wordpress.org/latest.tar.gz -P /tmp
+rm -rf /tmp/wp-cli.phar
 ```
 
 > [!TIP]  
-> Hacemos esto para evitar que haya duplicados dentro de ese directorio a la hora de descargarnos el codigo fuente de WordPress.
+> Hacemos esto para evitar que haya duplicados dentro de ese directorio a la hora de descargarnos el WP-CLI.
+
+### Paso 3. Descargamos el WP-CLI
+
+```bash
+wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -P /tmp
+```
 
 ### Paso 4. Descomprimimos el codigo fuente de WordPress
 
