@@ -158,3 +158,12 @@ chown -R www-data:www-data /var/www/html/
 ![](imagenes/WordPress-1.7.png)
 
 ![](imagenes/WordPress3-1.7.png)
+
+![](imagenes/WordPress4-1.7.png)
+
+> [!IMPORTANT]  
+> Esto pasa al poner en la dirección web `https://practicawsarl.zapto.org/wp-admin/` ya que instalemos el plugin `wps-hide-login` que lo que hace es ocultar la página de inicio de sesión de wordpress al poner `wp-admin`. Si queremos ir al panel de administración, tendremos que poner la palabra que pusimos en la variable que le indiquemos al configurar el plugin, que en mi caso es `noimporta`.
+
+![](imagenes/WordPress5-1.7.png)
+
+![](imagenes/WordPress6-1.7.png)
