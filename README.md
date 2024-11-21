@@ -111,14 +111,19 @@ wp core install --url=$LE_DOMAIN --title=$WORDPRESS_TITULO --admin_user=$WORDPRE
 >
 > Las variables las cambiamos por las que tenemos en el archivo `.env` configuradas para que se cree todo correctamente.
 
+### Paso 11. Instalamos y activamos el theme mindscape
 
-### Paso 11. Instalamos un plugin
+```bash
+wp theme install mindscape --activate --path=$WORDPRESS_DIRECTORY --allow-root
+```
+
+### Paso 12. Instalamos un plugin
 
 ```bash
 wp plugin install wps-hide-login --activate --path=$WORDPRESS_DIRECTORY --allow-root
 ```
 
-### Paso 12. Configuramos el plugin de WHL
+### Paso 13. Configuramos el plugin de WHL
 
 ```bash
 wp option update whl_page "$WORDPRESS_HIDE_LOGIN_URL" --path=$WORDPRESS_DIRECTORY --allow-root
@@ -129,7 +134,7 @@ wp option update whl_page "$WORDPRESS_HIDE_LOGIN_URL" --path=$WORDPRESS_DIRECTOR
 >  
 > La variable la cambiamos por la que tenemos en el archivo `.env` configurada para que se active correctamente.
 
-### Paso 13. Configuramos los enlaces permanentes
+### Paso 14. Configuramos los enlaces permanentes
 
 ```bash
 wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
@@ -145,13 +150,13 @@ wp rewrite structure '/%postname%/' --path=$WORDPRESS_DIRECTORY --allow-root
 > 
 > Es importante mencionar que para que los enlaces permanentes funcionen correctamente, el módulo `mod_rewrite` de Apache debe estar activado y la directiva `AllowOverride All` debe estar configurada en el sitio virtual de Apache.
 
-### Paso 14. Cambiamos el propietario y el grupo al directorio /var/www/html/
+### Paso 15. Cambiamos el propietario y el grupo al directorio /var/www/html/
 
 ```bash
 chown -R www-data:www-data /var/www/html/
 ```
 
-### Paso 15. Comprobación de que WordPress y los plugins funcionan
+### Paso 16. Comprobación de que WordPress y los plugins funcionan
 
 ![](imagenes/WordPress2-1.7.png)
 
